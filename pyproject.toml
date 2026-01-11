@@ -4,7 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "click>=8.1.8",
+    "httpx>=0.28.1",
+    "lxml>=5.4.0",
+    "pydantic>=2.11.4",
+    "python-dotenv>=1.1.0",
+    "xmltodict>=0.14.2",
+]
 
 [project.scripts]
 start = "firmenbuch_api.main:main"
