@@ -4,15 +4,10 @@ from ..config import (
     AUSZUG_NAMESPACE,
     AUSZUG_SOAP_ACTION,
     SUCHE_FIRMA_NAMESPACE,
-    SUCHE_FIRMA_SOAP_ACTION,
     SUCHE_URKUNDE_NAMESPACE,
-    SUCHE_URKUNDE_SOAP_ACTION,
     URKUNDE_NAMESPACE,
-    URKUNDE_SOAP_ACTION,
     VERAENDERUNGEN_FIRMA_NAMESPACE,
-    VERAENDERUNGEN_FIRMA_SOAP_ACTION,
     VERAENDERUNGEN_URKUNDE_NAMESPACE,
-    VERAENDERUNGEN_URKUNDE_SOAP_ACTION,
 )
 from ..models.request_models import (
     AuszugRequest,
@@ -92,7 +87,7 @@ def suche_firma(api_key: str, request: SucheFirmaRequest) -> dict:
     body = "\n".join(lines)
 
     envelope = build_envelope(SUCHE_FIRMA_NAMESPACE, body)
-    return send_soap_request(api_key, envelope, SUCHE_FIRMA_SOAP_ACTION)
+    return send_soap_request(api_key, envelope)
 
 
 def suche_urkunde(api_key: str, request: SucheUrkundeRequest) -> dict:
@@ -117,7 +112,7 @@ def suche_urkunde(api_key: str, request: SucheUrkundeRequest) -> dict:
     )
 
     envelope = build_envelope(SUCHE_URKUNDE_NAMESPACE, body)
-    return send_soap_request(api_key, envelope, SUCHE_URKUNDE_SOAP_ACTION)
+    return send_soap_request(api_key, envelope)
 
 
 def get_veraenderungen_firma(api_key: str, request: VeraenderungenFirmaRequest) -> dict:
@@ -153,7 +148,7 @@ def get_veraenderungen_firma(api_key: str, request: VeraenderungenFirmaRequest) 
     body = "\n".join(lines)
 
     envelope = build_envelope(VERAENDERUNGEN_FIRMA_NAMESPACE, body)
-    return send_soap_request(api_key, envelope, VERAENDERUNGEN_FIRMA_SOAP_ACTION)
+    return send_soap_request(api_key, envelope)
 
 
 def get_veraenderungen_urkunde(api_key: str, request: VeraenderungenUrkundeRequest) -> dict:
@@ -178,7 +173,7 @@ def get_veraenderungen_urkunde(api_key: str, request: VeraenderungenUrkundeReque
     )
 
     envelope = build_envelope(VERAENDERUNGEN_URKUNDE_NAMESPACE, body)
-    return send_soap_request(api_key, envelope, VERAENDERUNGEN_URKUNDE_SOAP_ACTION)
+    return send_soap_request(api_key, envelope)
 
 
 def get_urkunde(api_key: str, request: UrkundeRequest) -> dict:
@@ -212,4 +207,4 @@ def get_urkunde(api_key: str, request: UrkundeRequest) -> dict:
         )
 
     envelope = build_envelope(URKUNDE_NAMESPACE, request_body)
-    return send_soap_request(api_key, envelope, URKUNDE_SOAP_ACTION)
+    return send_soap_request(api_key, envelope)
