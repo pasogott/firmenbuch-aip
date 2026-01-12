@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from firmenbuch_api_oesterreich.config import load_env_file, get_env_api_key
+from firmenbuch_api_oesterreich.config import get_env_api_key, load_env_file
 
 
 def test_load_env_file_reads_key(tmp_path: Path, monkeypatch):

@@ -30,13 +30,13 @@ Nach erfolgreicher Registrierung erhältst du:
 
 ```bash
 # Interaktiv (empfohlen - Key wird nicht im Terminal angezeigt)
-fb config set-key
+firmenbuchat config set-key
 
 # Oder direkt
-fb config set-key "dein-api-key-hier"
+firmenbuchat config set-key "dein-api-key-hier"
 
 # Prüfen ob gespeichert
-fb config show
+firmenbuchat config show
 ```
 
 ### 5. Alternativ: Umgebungsvariable oder .env Datei
@@ -54,7 +54,7 @@ echo "FIRMENBUCH_API_KEY=dein-api-key-hier" > .env
 Wenn du eine andere `.env` Datei verwenden möchtest:
 
 ```bash
-fb --env-file /pfad/zu/deiner.env suche firma "Muster*"
+firmenbuchat --env-file /pfad/zu/deiner.env suche firma "Muster*"
 ```
 
 ---
@@ -89,10 +89,10 @@ Die Firmenbuch High-Value Dataset API ist **kostenlos** nutzbar.
 
 ```bash
 # Prüfe ob Key korrekt gespeichert
-fb config show
+firmenbuchat config show
 
 # Teste mit direkter Angabe
-fb suche firma "Test*" --api-key "dein-key"
+firmenbuchat suche firma "Test*" --api-key "dein-key"
 ```
 
 ### Rate-Limit erreicht?

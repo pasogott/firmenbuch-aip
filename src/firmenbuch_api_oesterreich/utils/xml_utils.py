@@ -26,7 +26,7 @@ def _clean_namespaces(data: dict) -> dict:
                 clean_key = clean_key[1:]
 
             # Rekursiv bereinigen
-            if isinstance(value, (dict, list)):
+            if isinstance(value, dict | list):
                 cleaned[clean_key] = _clean_namespaces(value)
             else:
                 cleaned[clean_key] = value

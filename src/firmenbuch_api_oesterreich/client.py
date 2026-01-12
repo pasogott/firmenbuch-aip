@@ -1,15 +1,14 @@
 # firmenbuch_sdk/client.py
 
-from typing import Optional
 
 import httpx
 from lxml import etree
 
 
-class SOAPFault(Exception):
+class SOAPFaultError(Exception):
     """Wird geworfen, wenn ein SOAP Fault auftritt."""
 
-    def __init__(self, message: str, code: Optional[str] = None):
+    def __init__(self, message: str, code: str | None = None):
         super().__init__(message)
         self.code = code
 
@@ -34,7 +33,7 @@ class FirmenbuchClient:
         if fault is not None:
             reason = fault.findtext(".//{http://www.w3.org/2003/05/soap-envelope}Text")
             code = fault.findtext(".//{http://www.w3.org/2003/05/soap-envelope}Value")
-            raise SOAPFault(message=reason or "Unbekannter SOAP-Fehler", code=code)
+            raise SOAPFaultError(message=reason or "Unbekannter SOAP-Fehler", code=code)
 
     def send_soap_request(self, xml_body: str) -> etree._Element:
         response = httpx.post(

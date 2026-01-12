@@ -1,6 +1,6 @@
 """Gemeinsame CLI-Hilfsfunktionen."""
 
-from typing import Any, Optional
+from typing import Any
 
 import typer
 
@@ -9,7 +9,7 @@ from .config_store import get_api_key_from_config
 from .console import print_error
 
 
-def resolve_api_key(api_key: Optional[str]) -> str:
+def resolve_api_key(api_key: str | None) -> str:
     """Ermittelt den API-Key aus Parametern, Config oder ENV."""
     if api_key:
         return api_key
@@ -24,7 +24,7 @@ def resolve_api_key(api_key: Optional[str]) -> str:
 
     print_error(
         "Kein API-Key gefunden!\n\n"
-        "Setze den Key mit: fb config set-key\n"
+        "Setze den Key mit: firmenbuchat config set-key\n"
         "Oder übergib ihn mit: --api-key KEY"
     )
     raise typer.Exit(1)

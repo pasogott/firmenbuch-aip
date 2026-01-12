@@ -25,6 +25,11 @@ from ..models.request_models import (
 from .soap_client import build_envelope, send_soap_request
 
 
+def _optional_tag(tag: str, value: str | None) -> str:
+    if value is None or value == "":
+        return ""
+    return f"<fb:{tag}>{value}</fb:{tag}>"
+
 
 def get_auszug(api_key: str, request: AuszugRequest) -> dict:
     """
@@ -66,17 +71,25 @@ def suche_firma(api_key: str, request: SucheFirmaRequest) -> dict:
     Raises:
         HTTPError: Bei Fehlern in der HTTP-Kommunikation
     """
-    body = (
-        "  <fb:SUCHEFIRMAREQUEST>\n"
-        f"    <fb:FIRMENWORTLAUT>{request.firmenwortlaut}</fb:FIRMENWORTLAUT>\n"
-        f"    <fb:EXAKTESUCHE>{str(request.exaktesuche).lower()}</fb:EXAKTESUCHE>\n"
-        f"    <fb:SUCHBEREICH>{request.suchbereich}</fb:SUCHBEREICH>\n"
-        f"    {f'<fb:GERICHT>{request.gericht}</fb:GERICHT>' if request.gericht else ''}\n"
-        f"    {f'<fb:RECHTSFORM>{request.rechtsform}</fb:RECHTSFORM>' if request.rechtsform else ''}\n"
-        f"    {f'<fb:RECHTSEIGENSCHAFT>{request.rechtseigenschaft}</fb:RECHTSEIGENSCHAFT>' if request.rechtseigenschaft else ''}\n"
-        f"    {f'<fb:ORTNR>{request.ortnr}</fb:ORTNR>' if request.ortnr else ''}\n"
-        "  </fb:SUCHEFIRMAREQUEST>"
-    )
+    lines = [
+        "  <fb:SUCHEFIRMAREQUEST>",
+        f"    <fb:FIRMENWORTLAUT>{request.firmenwortlaut}</fb:FIRMENWORTLAUT>",
+        f"    <fb:EXAKTESUCHE>{str(request.exaktesuche).lower()}</fb:EXAKTESUCHE>",
+        f"    <fb:SUCHBEREICH>{request.suchbereich}</fb:SUCHBEREICH>",
+    ]
+
+    for tag, value in (
+        ("GERICHT", request.gericht),
+        ("RECHTSFORM", request.rechtsform),
+        ("RECHTSEIGENSCHAFT", request.rechtseigenschaft),
+        ("ORTNR", request.ortnr),
+    ):
+        optional = _optional_tag(tag, value)
+        if optional:
+            lines.append(f"    {optional}")
+
+    lines.append("  </fb:SUCHEFIRMAREQUEST>")
+    body = "\n".join(lines)
 
     envelope = build_envelope(SUCHE_FIRMA_NAMESPACE, body)
     return send_soap_request(api_key, envelope, SUCHE_FIRMA_SOAP_ACTION)
@@ -121,23 +134,29 @@ def get_veraenderungen_firma(api_key: str, request: VeraenderungenFirmaRequest) 
     Raises:
         HTTPError: Bei Fehlern in der HTTP-Kommunikation
     """
-    body = (
-        "  <fb:VERAENDERUNGENFIRMAREQUEST>\n"
-        f"    <fb:VON>{request.von}</fb:VON>\n"
-        f"    <fb:BIS>{request.bis}</fb:BIS>\n"
-        f"    {f'<fb:GERICHT>{request.gericht}</fb:GERICHT>' if request.gericht else ''}\n"
-        f"    {f'<fb:RECHTSFORM>{request.rechtsform}</fb:RECHTSFORM>' if request.rechtsform else ''}\n"
-        f"    {f'<fb:ARTDERVERAENDERUNG>{request.art_der_veraenderung}</fb:ARTDERVERAENDERUNG>' if request.art_der_veraenderung else ''}\n"
-        "  </fb:VERAENDERUNGENFIRMAREQUEST>"
-    )
+    lines = [
+        "  <fb:VERAENDERUNGENFIRMAREQUEST>",
+        f"    <fb:VON>{request.von}</fb:VON>",
+        f"    <fb:BIS>{request.bis}</fb:BIS>",
+    ]
+
+    for tag, value in (
+        ("GERICHT", request.gericht),
+        ("RECHTSFORM", request.rechtsform),
+        ("ARTDERVERAENDERUNG", request.art_der_veraenderung),
+    ):
+        optional = _optional_tag(tag, value)
+        if optional:
+            lines.append(f"    {optional}")
+
+    lines.append("  </fb:VERAENDERUNGENFIRMAREQUEST>")
+    body = "\n".join(lines)
 
     envelope = build_envelope(VERAENDERUNGEN_FIRMA_NAMESPACE, body)
     return send_soap_request(api_key, envelope, VERAENDERUNGEN_FIRMA_SOAP_ACTION)
 
 
-def get_veraenderungen_urkunde(
-    api_key: str, request: VeraenderungenUrkundeRequest
-) -> dict:
+def get_veraenderungen_urkunde(api_key: str, request: VeraenderungenUrkundeRequest) -> dict:
     """
     Ruft Urkundenveränderungen ab.
 
@@ -177,10 +196,12 @@ def get_urkunde(api_key: str, request: UrkundeRequest) -> dict:
         HTTPError: Bei Fehlern in der HTTP-Kommunikation
     """
     if request.key:
-        request_body = (
-            "  <fb:URKUNDEREQUEST>\n"
-            f"    <fb:KEY>{request.key}</fb:KEY>\n"
-            "  </fb:URKUNDEREQUEST>"
+        request_body = "\n".join(
+            [
+                "  <fb:URKUNDEREQUEST>",
+                f"    <fb:KEY>{request.key}</fb:KEY>",
+                "  </fb:URKUNDEREQUEST>",
+            ]
         )
     else:
         request_body = (

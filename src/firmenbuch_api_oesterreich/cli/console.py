@@ -8,7 +8,6 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich.tree import Tree
 
 # Globale Console-Instanz
 console = Console()
@@ -17,6 +16,7 @@ err_console = Console(stderr=True)
 
 class OutputFormat(str, Enum):
     """Ausgabeformate."""
+
     TABLE = "table"
     JSON = "json"
     RAW = "raw"
@@ -24,11 +24,7 @@ class OutputFormat(str, Enum):
 
 def print_error(message: str, title: str = "Fehler") -> None:
     """Gibt eine Fehlermeldung aus."""
-    err_console.print(Panel(
-        Text(message, style="red"),
-        title=f"❌ {title}",
-        border_style="red"
-    ))
+    err_console.print(Panel(Text(message, style="red"), title=f"❌ {title}", border_style="red"))
 
 
 def print_success(message: str) -> None:
@@ -70,7 +66,7 @@ def print_firma_table(firmen: list[dict], total: int | None = None) -> None:
             ("Sitz", "dim"),
             ("Rechtsform", "green"),
             ("Gericht", "dim"),
-        ]
+        ],
     )
 
     for firma in firmen:
@@ -108,7 +104,7 @@ def print_urkunden_table(urkunden: list[dict], total: int | None = None) -> None
             ("Datum", "cyan"),
             ("Typ", "green"),
             ("Größe", "dim"),
-        ]
+        ],
     )
 
     for urkunde in urkunden:
@@ -138,21 +134,23 @@ def print_urkunden_table(urkunden: list[dict], total: int | None = None) -> None
 def print_auszug(auszug: dict) -> None:
     """Gibt einen Firmenbuchauszug formatiert aus."""
     response = auszug.get("Envelope", {}).get("Body", {}).get("AUSZUG_V2_RESPONSE", {})
-    
+
     # Header-Info
-    console.print(Panel(
-        f"[cyan]FNR:[/cyan] {response.get('FNR', 'N/A')}\n"
-        f"[cyan]Stichtag:[/cyan] {response.get('STICHTAG', 'N/A')}\n"
-        f"[cyan]Umfang:[/cyan] {response.get('UMFANG', 'N/A')}\n"
-        f"[cyan]Abfragezeitpunkt:[/cyan] {response.get('ABFRAGEZEITPUNKT', 'N/A')}",
-        title="📋 Firmenbuchauszug",
-        border_style="blue"
-    ))
-    
+    console.print(
+        Panel(
+            f"[cyan]FNR:[/cyan] {response.get('FNR', 'N/A')}\n"
+            f"[cyan]Stichtag:[/cyan] {response.get('STICHTAG', 'N/A')}\n"
+            f"[cyan]Umfang:[/cyan] {response.get('UMFANG', 'N/A')}\n"
+            f"[cyan]Abfragezeitpunkt:[/cyan] {response.get('ABFRAGEZEITPUNKT', 'N/A')}",
+            title="📋 Firmenbuchauszug",
+            border_style="blue",
+        )
+    )
+
     firma = response.get("FIRMA", {})
     if not firma:
         return
-    
+
     # Firmenbezeichnung
     bezeichnung = firma.get("FI_DKZ02", {})
     if bezeichnung:
@@ -160,11 +158,11 @@ def print_auszug(auszug: dict) -> None:
         if isinstance(name_parts, str):
             name_parts = [name_parts]
         console.print(f"\n[bold]🏢 {' '.join(name_parts)}[/bold]")
-    
+
     # Adresse
     adresse = firma.get("FI_DKZ03", {})
     if adresse:
-        console.print(f"\n📍 [dim]Geschäftsanschrift:[/dim]")
+        console.print("\n📍 [dim]Geschäftsanschrift:[/dim]")
         console.print(f"   {adresse.get('STELLE', '')}")
         console.print(f"   {adresse.get('PLZ', '')} {adresse.get('ORT', '')}")
 
@@ -183,7 +181,7 @@ def print_veraenderungen_table(
             ("Datum", "white"),
             ("Art", "green"),
             ("VNR", "dim"),
-        ]
+        ],
     )
 
     for v in veraenderungen:

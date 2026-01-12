@@ -1,7 +1,6 @@
 """Konfigurationsspeicher für die CLI."""
 
 from pathlib import Path
-from typing import Optional
 
 CONFIG_DIR = Path.home() / ".config" / "firmenbuch"
 CONFIG_FILE = CONFIG_DIR / "config"
@@ -12,7 +11,7 @@ def get_config_file() -> Path:
     return CONFIG_FILE
 
 
-def get_api_key_from_config() -> Optional[str]:
+def get_api_key_from_config() -> str | None:
     """Liest den API-Key aus der Config-Datei."""
     config_file = get_config_file()
     if not config_file.exists():

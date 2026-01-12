@@ -1,7 +1,6 @@
 """Doctor-Befehl für Setup-Diagnose."""
 
 from pathlib import Path
-from typing import Optional
 
 import httpx
 import typer
@@ -16,7 +15,7 @@ app = typer.Typer(help="Setup-Diagnose und Checks")
 
 @app.callback(invoke_without_command=True)
 def doctor(
-    env_file: Optional[Path] = typer.Option(
+    env_file: Path | None = typer.Option(
         None,
         "--env-file",
         "-e",

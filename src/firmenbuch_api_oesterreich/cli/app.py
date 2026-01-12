@@ -1,27 +1,27 @@
 """Firmenbuch CLI - Hauptapplikation."""
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from .commands import auszug, config, doctor, suche, urkunde, veraenderungen
 from ..config import load_env_file
+from .commands import auszug, config, doctor, suche, urkunde, veraenderungen
 
 # Haupt-App
 app = typer.Typer(
-    name="fb",
+    name="firmenbuchat",
     help="🇦🇹 Firmenbuch CLI - Zugriff auf das österreichische Firmenbuch",
     no_args_is_help=True,
     rich_markup_mode="rich",
     pretty_exceptions_enable=True,
 )
 
+
 @app.callback()
 def main_callback(
-    env_file: Optional[Path] = typer.Option(
+    env_file: Path | None = typer.Option(
         None,
         "--env-file",
         "-e",
@@ -53,32 +53,42 @@ def version() -> None:
 def info() -> None:
     """Zeigt Informationen zur API und wie man einen API-Key bekommt."""
     console = Console()
-    
-    console.print(Panel(
-        "[bold cyan]🇦🇹 Firmenbuch WebServices API[/bold cyan]\n\n"
-        "Zugriff auf das österreichische Firmenbuch über die\n"
-        "offiziellen High-Value Dataset (HVD) WebServices.\n\n"
-        "[dim]Basis-URL:[/dim] https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws",
-        title="ℹ️  Info",
-        border_style="blue"
-    ))
-    
+
+    console.print(
+        Panel(
+            "[bold cyan]🇦🇹 Firmenbuch WebServices API[/bold cyan]\n\n"
+            "Zugriff auf das österreichische Firmenbuch über die\n"
+            "offiziellen High-Value Dataset (HVD) WebServices.\n\n"
+            "[dim]Basis-URL:[/dim] https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws",
+            title="ℹ️  Info",
+            border_style="blue",
+        )
+    )
+
     console.print("\n[bold]🔑 API-Key erhalten[/bold]\n")
-    console.print("  1. Gehe zu [link=https://www.justiz.gv.at/service/datenschutz/justizonline-api.2c94848b8b511b7a018c6a8e30e1045c.de.html]justiz.gv.at API-Registrierung[/link]")
+    console.print(
+        "  1. Gehe zu [link=https://www.justiz.gv.at/service/datenschutz/"
+        "justizonline-api.2c94848b8b511b7a018c6a8e30e1045c.de.html]"
+        "justiz.gv.at API-Registrierung[/link]"
+    )
     console.print("  2. Registriere dich für die Firmenbuch-API")
-    console.print("  3. Speichere deinen Key mit: [cyan]fb config set-key[/cyan]")
-    
+    console.print("  3. Speichere deinen Key mit: [cyan]firmenbuchat config set-key[/cyan]")
+
     console.print("\n[bold]📚 Dokumentation[/bold]\n")
-    console.print("  • API-Docs: [link=https://github.com/pasogott/firmenbuch-aip/tree/main/docs]github.com/pasogott/firmenbuch-aip/docs[/link]")
-    console.print("  • WSDL: [link=https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws/fbw.wsdl]justizonline.gv.at/.../fbw.wsdl[/link]")
-    
+    console.print(
+        "  • API-Docs: [link=https://github.com/pasogott/firmenbuch-aip/tree/main/docs]github.com/pasogott/firmenbuch-aip/docs[/link]"
+    )
+    console.print(
+        "  • WSDL: [link=https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws/fbw.wsdl]justizonline.gv.at/.../fbw.wsdl[/link]"
+    )
+
     console.print("\n[bold]🚀 Schnellstart[/bold]\n")
     console.print("  [dim]# API-Key setzen[/dim]")
-    console.print("  fb config set-key\n")
+    console.print("  firmenbuchat config set-key\n")
     console.print("  [dim]# Firma suchen[/dim]")
-    console.print("  fb suche firma \"Musterfirma*\"\n")
+    console.print('  firmenbuchat suche firma "Musterfirma*"\n')
     console.print("  [dim]# Firmenbuchauszug abrufen[/dim]")
-    console.print("  fb auszug 160573m\n")
+    console.print("  firmenbuchat auszug 160573m\n")
 
 
 def main() -> None:

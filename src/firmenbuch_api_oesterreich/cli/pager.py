@@ -1,9 +1,7 @@
 """Pagination helper for CLI output."""
 
-from typing import Iterable, List
 
-
-def paginate(items: List, limit: int, offset: int) -> List:
+def paginate(items: list, limit: int, offset: int) -> list:
     """Applies limit/offset to a list of items."""
     if offset < 0:
         offset = 0

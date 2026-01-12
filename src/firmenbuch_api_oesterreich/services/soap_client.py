@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 import httpx
 from lxml import etree
 
@@ -13,10 +11,10 @@ from ..utils.xml_utils import xml_to_json
 SOAP_ENV_NS = "http://www.w3.org/2003/05/soap-envelope"
 
 
-class SOAPFault(Exception):
+class SOAPFaultError(Exception):
     """Wird geworfen, wenn ein SOAP Fault auftritt."""
 
-    def __init__(self, message: str, code: Optional[str] = None) -> None:
+    def __init__(self, message: str, code: str | None = None) -> None:
         super().__init__(message)
         self.code = code
 
@@ -24,8 +22,8 @@ class SOAPFault(Exception):
 def build_envelope(namespace: str, body: str) -> str:
     """Baut ein SOAP-Envelope mit Namespace und Body."""
     return (
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        f"<soap:Envelope xmlns:soap=\"{SOAP_ENV_NS}\" xmlns:fb=\"{namespace}\">\n"
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<soap:Envelope xmlns:soap="{SOAP_ENV_NS}" xmlns:fb="{namespace}">\n'
         "  <soap:Header/>\n"
         "  <soap:Body>\n"
         f"{body}\n"
@@ -42,12 +40,10 @@ def _check_for_soap_fault(xml_root: etree._Element) -> None:
 
     reason = fault.findtext(f".//{{{SOAP_ENV_NS}}}Text")
     code = fault.findtext(f".//{{{SOAP_ENV_NS}}}Value")
-    raise SOAPFault(message=reason or "Unbekannter SOAP-Fehler", code=code)
+    raise SOAPFaultError(message=reason or "Unbekannter SOAP-Fehler", code=code)
 
 
-def send_soap_request(
-    api_key: str, envelope: str, soap_action: Optional[str] = None
-) -> dict:
+def send_soap_request(api_key: str, envelope: str, soap_action: str | None = None) -> dict:
     """Sendet einen SOAP-Request und gibt JSON zurück."""
     headers = {
         "Content-Type": "application/soap+xml;charset=UTF-8",

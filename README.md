@@ -3,7 +3,7 @@
 Moderne CLI für das österreichische Firmenbuch - Zugriff auf die offiziellen High-Value Dataset WebServices.
 
 ```
-$ fb suche firma "Software*" --rechtsform GES
+$ firmenbuchat suche firma "Software*" --rechtsform GES
 
 ┏━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ FNR        ┃ Name                              ┃ Sitz    ┃ Rechtsform               ┃
@@ -39,16 +39,13 @@ $ fb suche firma "Software*" --rechtsform GES
 
 ```bash
 # Mit uv (empfohlen)
-uv pip install git+https://github.com/pasogott/firmenbuch-aip.git
-
-# Oder mit pip
-pip install git+https://github.com/pasogott/firmenbuch-aip.git
+uv add git+https://github.com/pasogott/firmenbuch-aip.git
 
 # Für Entwicklung
 git clone https://github.com/pasogott/firmenbuch-aip.git
 cd firmenbuch-aip
 uv venv && source .venv/bin/activate
-uv pip install -e .
+uv add --editable .
 ```
 
 ---
@@ -59,13 +56,13 @@ Du benötigst einen API-Key von JustizOnline. Siehe [API-Key erhalten](docs/API-
 
 ```bash
 # API-Key sicher speichern (interaktiv)
-fb config set-key
+firmenbuchat config set-key
 
 # Oder als Umgebungsvariable
 export FIRMENBUCH_API_KEY="dein-key"
 
 # Oder eigene .env Datei verwenden
-fb --env-file /pfad/zu/deiner.env suche firma "Muster*"
+firmenbuchat --env-file /pfad/zu/deiner.env suche firma "Muster*"
 ```
 
 ---
@@ -76,68 +73,68 @@ fb --env-file /pfad/zu/deiner.env suche firma "Muster*"
 
 ```bash
 # Einfache Suche
-fb suche firma "Musterfirma*"
+firmenbuchat suche firma "Musterfirma*"
 
 # Mit Filtern
-fb suche firma "Software" --rechtsform GES --gericht 007
+firmenbuchat suche firma "Software" --rechtsform GES --gericht 007
 
 # Als JSON ausgeben
-fb suche firma "Test*" -o json
+firmenbuchat suche firma "Test*" -o json
 ```
 
 ### Firmenbuchauszug
 
 ```bash
 # Kurzinformation (Standard)
-fb auszug 160573m
+firmenbuchat auszug 160573m
 
 # Mit Stichtag
-fb auszug 160573m --stichtag 2024-01-01
+firmenbuchat auszug 160573m --stichtag 2024-01-01
 
 # Vollständiger Auszug als JSON
-fb auszug 160573m -u "aktueller Auszug" -o json
+firmenbuchat auszug 160573m -u "aktueller Auszug" -o json
 ```
 
 ### Urkunden
 
 ```bash
 # Urkunden einer Firma suchen
-fb suche urkunde 160573m
+firmenbuchat suche urkunde 160573m
 
 # Urkunde herunterladen
-fb urkunde download "304188_0070711322495_000___000_30_7730290_PDF"
+firmenbuchat urkunde download "304188_0070711322495_000___000_30_7730290_PDF"
 
 # Mit eigenem Dateinamen
-fb urkunde download "..." -o jahresabschluss.pdf
+firmenbuchat urkunde download "..." -o jahresabschluss.pdf
 ```
 
 ### Veränderungen
 
 ```bash
 # Firmenänderungen der letzten 7 Tage
-fb veraenderungen firmen
+firmenbuchat veraenderungen firmen
 
 # Für bestimmten Zeitraum
-fb veraenderungen firmen --von 2024-01-01 --bis 2024-01-31
+firmenbuchat veraenderungen firmen --von 2024-01-01 --bis 2024-01-31
 
 # Nur bestimmte Rechtsformen
-fb veraenderungen firmen -r AG -g 007
+firmenbuchat veraenderungen firmen -r AG -g 007
 ```
 
 ### Konfiguration
 
 ```bash
 # API-Key setzen
-fb config set-key
+firmenbuchat config set-key
 
 # Aktuelle Config anzeigen
-fb config show
+firmenbuchat config show
 
 # API-Infos und Hilfe
-fb info
+firmenbuchat info
 
 # Diagnose
-fb doctor
+firmenbuchat doctor
 ```
 
 ---
@@ -146,17 +143,17 @@ fb doctor
 
 | Befehl | Beschreibung |
 |--------|--------------|
-| `fb auszug FNR` | Firmenbuchauszug abrufen |
-| `fb suche firma SUCHBEGRIFF` | Nach Firmen suchen |
-| `fb suche urkunde FNR` | Urkunden einer Firma suchen |
-| `fb urkunde download KEY` | Urkunde herunterladen |
-| `fb urkunde info KEY` | Urkunden-Metadaten anzeigen |
-| `fb veraenderungen firmen` | Firmenänderungen abfragen |
-| `fb veraenderungen urkunden` | Urkundenänderungen abfragen |
-| `fb config set-key` | API-Key speichern |
-| `fb config show` | Konfiguration anzeigen |
-| `fb doctor` | Setup-Diagnose |
-| `fb info` | API-Infos und Hilfe |
+| `firmenbuchat auszug FNR` | Firmenbuchauszug abrufen |
+| `firmenbuchat suche firma SUCHBEGRIFF` | Nach Firmen suchen |
+| `firmenbuchat suche urkunde FNR` | Urkunden einer Firma suchen |
+| `firmenbuchat urkunde download KEY` | Urkunde herunterladen |
+| `firmenbuchat urkunde info KEY` | Urkunden-Metadaten anzeigen |
+| `firmenbuchat veraenderungen firmen` | Firmenänderungen abfragen |
+| `firmenbuchat veraenderungen urkunden` | Urkundenänderungen abfragen |
+| `firmenbuchat config set-key` | API-Key speichern |
+| `firmenbuchat config show` | Konfiguration anzeigen |
+| `firmenbuchat doctor` | Setup-Diagnose |
+| `firmenbuchat info` | API-Infos und Hilfe |
 
 ### Globale Optionen
 
@@ -170,6 +167,23 @@ fb doctor
 | `--help` | Hilfe anzeigen |
 
 ---
+
+## ✅ Linting & Tests
+
+```bash
+# Dev-Tools installieren
+uv add --dev ruff mypy pytest pytest-mock pre-commit
+
+# Pre-commit Hooks aktivieren
+pre-commit install
+
+# Manuell ausführen
+ruff check .
+ruff format .
+pytest -q
+```
+
+Weitere Infos: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## 📁 Projektstruktur
 
