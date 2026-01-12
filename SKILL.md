@@ -9,6 +9,13 @@ CLI für den Zugriff auf die österreichischen Firmenbuch-WebServices (HVD).
 uv add git+https://github.com/pasogott/firmenbuch-aip.git
 ```
 
+## Installation (Homebrew)
+
+```bash
+brew tap pasogott/tap
+brew install firmenbuchat
+```
+
 ## Dev-Setup
 
 ```bash
@@ -33,6 +40,7 @@ export FIRMENBUCH_API_KEY="dein-key"
 ## .env Datei verwenden
 
 ```bash
+cp .env.example .env
 firmenbuchat --env-file /pfad/zu/deiner.env suche firma "Muster*"
 ```
 
@@ -47,6 +55,12 @@ firmenbuchat urkunde download "URKUNDEN_KEY"
 firmenbuchat veraenderungen firmen --von 2024-01-01 --bis 2024-01-31
 firmenbuchat veraenderungen urkunden --von 2024-01-01 --bis 2024-01-31
 firmenbuchat doctor
+```
+
+## Hilfe
+
+```bash
+firmenbuchat help
 ```
 
 ## Globale Optionen
