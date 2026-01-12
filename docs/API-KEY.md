@@ -39,7 +39,7 @@ fb config set-key "dein-api-key-hier"
 fb config show
 ```
 
-### 5. Alternativ: Umgebungsvariable
+### 5. Alternativ: Umgebungsvariable oder .env Datei
 
 Du kannst den Key auch als Umgebungsvariable setzen:
 
@@ -49,6 +49,12 @@ export FIRMENBUCH_API_KEY="dein-api-key-hier"
 
 # Oder in .env Datei im Projektverzeichnis
 echo "FIRMENBUCH_API_KEY=dein-api-key-hier" > .env
+```
+
+Wenn du eine andere `.env` Datei verwenden möchtest:
+
+```bash
+fb --env-file /pfad/zu/deiner.env suche firma "Muster*"
 ```
 
 ---

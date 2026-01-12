@@ -7,6 +7,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from ...models.request_models import SucheFirmaRequest, SucheUrkundeRequest
 from ...services.auszug import suche_firma, suche_urkunde
+from ..common import ensure_list, extract_response, resolve_api_key
 from ..console import (
     OutputFormat,
     console,
@@ -16,25 +17,8 @@ from ..console import (
     print_urkunden_table,
     print_warning,
 )
-from .config import get_api_key_from_config
 
 app = typer.Typer(help="Firmen und Urkunden suchen")
-
-
-def get_api_key(api_key: Optional[str]) -> str:
-    """Holt den API-Key aus Parameter oder Config."""
-    if api_key:
-        return api_key
-    
-    key = get_api_key_from_config()
-    if not key:
-        print_error(
-            "Kein API-Key gefunden!\n\n"
-            "Setze den Key mit: fb config set-key\n"
-            "Oder übergib ihn mit: --api-key KEY"
-        )
-        raise typer.Exit(1)
-    return key
 
 
 @app.command("firma")
@@ -92,7 +76,7 @@ def firma(
         
         fb suche firma "Mayer" -e -b 3
     """
-    key = get_api_key(api_key)
+    key = resolve_api_key(api_key)
     
     request = SucheFirmaRequest(
         firmenwortlaut=suchbegriff,
@@ -117,12 +101,8 @@ def firma(
             raise typer.Exit(1)
     
     # Ergebnisse extrahieren
-    response = result.get("Envelope", {}).get("Body", {}).get("SUCHEFIRMARESPONSE", {})
-    ergebnisse = response.get("ERGEBNIS", [])
-    
-    # Einzelergebnis in Liste umwandeln
-    if isinstance(ergebnisse, dict):
-        ergebnisse = [ergebnisse]
+    response = extract_response(result, "SUCHEFIRMARESPONSE")
+    ergebnisse = ensure_list(response.get("ERGEBNIS"))
     
     if not ergebnisse:
         print_warning("Keine Firmen gefunden")
@@ -163,7 +143,7 @@ def urkunde(
         
         fb suche urkunde "629 a" -o json
     """
-    key = get_api_key(api_key)
+    key = resolve_api_key(api_key)
     
     request = SucheUrkundeRequest(fnr=fnr)
     
@@ -182,12 +162,8 @@ def urkunde(
             raise typer.Exit(1)
     
     # Ergebnisse extrahieren
-    response = result.get("Envelope", {}).get("Body", {}).get("SUCHEURKUNDERESPONSE", {})
-    ergebnisse = response.get("ERGEBNIS", [])
-    
-    # Einzelergebnis in Liste umwandeln
-    if isinstance(ergebnisse, dict):
-        ergebnisse = [ergebnisse]
+    response = extract_response(result, "SUCHEURKUNDERESPONSE")
+    ergebnisse = ensure_list(response.get("ERGEBNIS"))
     
     if not ergebnisse:
         print_warning("Keine Urkunden gefunden")

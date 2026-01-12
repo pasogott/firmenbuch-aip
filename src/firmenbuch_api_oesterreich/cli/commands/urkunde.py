@@ -7,6 +7,9 @@ from typing import Annotated, Optional
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from ...models.request_models import UrkundeRequest
+from ...services.auszug import get_urkunde
+from ..common import extract_response, resolve_api_key
 from ..console import (
     OutputFormat,
     console,
@@ -14,54 +17,8 @@ from ..console import (
     print_json,
     print_success,
 )
-from .config import get_api_key_from_config
 
 app = typer.Typer(help="Urkunden abrufen und herunterladen")
-
-
-def get_api_key(api_key: Optional[str]) -> str:
-    """Holt den API-Key aus Parameter oder Config."""
-    if api_key:
-        return api_key
-    
-    key = get_api_key_from_config()
-    if not key:
-        print_error(
-            "Kein API-Key gefunden!\n\n"
-            "Setze den Key mit: fb config set-key\n"
-            "Oder übergib ihn mit: --api-key KEY"
-        )
-        raise typer.Exit(1)
-    return key
-
-
-def fetch_urkunde(api: str, key: str) -> dict:
-    """Lädt eine Urkunde vom Server."""
-    from ...config import API_URL, URKUNDE_NAMESPACE
-    import httpx
-    from ...utils.xml_utils import xml_to_json
-    
-    envelope = f"""<?xml version="1.0" encoding="UTF-8"?>
-    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
-                   xmlns:fb="{URKUNDE_NAMESPACE}">
-        <soap:Header/>
-        <soap:Body>
-            <fb:URKUNDEREQUEST>
-                <fb:KEY>{key}</fb:KEY>
-            </fb:URKUNDEREQUEST>
-        </soap:Body>
-    </soap:Envelope>
-    """
-    
-    headers = {
-        "Content-Type": "application/soap+xml;charset=UTF-8",
-        "X-API-KEY": api,
-    }
-    
-    response = httpx.post(API_URL, content=envelope, headers=headers)
-    response.raise_for_status()
-    
-    return xml_to_json(response.content)
 
 
 @app.command("info")
@@ -86,7 +43,7 @@ def info(
     
         fb urkunde info "304188_0070711322495_000___000_30_7730290_XML"
     """
-    api = get_api_key(api_key)
+    api = resolve_api_key(api_key)
     
     with Progress(
         SpinnerColumn(),
@@ -97,13 +54,13 @@ def info(
         progress.add_task("Lade Urkunde...", total=None)
         
         try:
-            result = fetch_urkunde(api, key)
+            result = get_urkunde(api, UrkundeRequest(key=key))
         except Exception as e:
             print_error(str(e))
             raise typer.Exit(1)
     
     # Metadaten extrahieren
-    response_data = result.get("Envelope", {}).get("Body", {}).get("URKUNDERESPONSE", {})
+    response_data = extract_response(result, "URKUNDERESPONSE")
     metadaten = response_data.get("METADATEN", {})
     
     if output == OutputFormat.JSON:
@@ -141,7 +98,7 @@ def download(
         
         fb urkunde download "304188_..._PDF" -o jahresabschluss.pdf
     """
-    api = get_api_key(api_key)
+    api = resolve_api_key(api_key)
     
     with Progress(
         SpinnerColumn(),
@@ -152,13 +109,13 @@ def download(
         progress.add_task("Lade Urkunde...", total=None)
         
         try:
-            result = fetch_urkunde(api, key)
+            result = get_urkunde(api, UrkundeRequest(key=key))
         except Exception as e:
             print_error(str(e))
             raise typer.Exit(1)
     
     # Dokument extrahieren
-    response_data = result.get("Envelope", {}).get("Body", {}).get("URKUNDERESPONSE", {})
+    response_data = extract_response(result, "URKUNDERESPONSE")
     dokument = response_data.get("DOKUMENT", {})
     metadaten = response_data.get("METADATEN", {})
     

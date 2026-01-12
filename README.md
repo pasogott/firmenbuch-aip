@@ -63,6 +63,9 @@ fb config set-key
 
 # Oder als Umgebungsvariable
 export FIRMENBUCH_API_KEY="dein-key"
+
+# Oder eigene .env Datei verwenden
+fb --env-file /pfad/zu/deiner.env suche firma "Muster*"
 ```
 
 ---
@@ -157,6 +160,7 @@ fb info
 |--------|--------------|
 | `-o, --output` | Ausgabeformat: `table` (Standard), `json`, `raw` |
 | `-k, --api-key` | API-Key direkt übergeben |
+| `-e, --env-file` | Pfad zu einer `.env` Datei |
 | `--help` | Hilfe anzeigen |
 
 ---

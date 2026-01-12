@@ -8,6 +8,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from ...models.request_models import AuszugRequest, AuszugUmfang
 from ...services.auszug import get_auszug
+from ..common import resolve_api_key
 from ..console import (
     OutputFormat,
     console,
@@ -15,25 +16,8 @@ from ..console import (
     print_error,
     print_json,
 )
-from .config import get_api_key_from_config
 
 app = typer.Typer(help="Firmenbuchauszüge abrufen")
-
-
-def get_api_key(api_key: Optional[str]) -> str:
-    """Holt den API-Key aus Parameter oder Config."""
-    if api_key:
-        return api_key
-    
-    key = get_api_key_from_config()
-    if not key:
-        print_error(
-            "Kein API-Key gefunden!\n\n"
-            "Setze den Key mit: fb config set-key\n"
-            "Oder übergib ihn mit: --api-key KEY"
-        )
-        raise typer.Exit(1)
-    return key
 
 
 @app.callback(invoke_without_command=True)
@@ -78,7 +62,7 @@ def auszug(
         
         fb auszug 160573m -u "aktueller Auszug" -o json
     """
-    key = get_api_key(api_key)
+    key = resolve_api_key(api_key)
     
     # Stichtag default: heute
     if stichtag is None:

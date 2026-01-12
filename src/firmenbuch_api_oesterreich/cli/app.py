@@ -1,10 +1,14 @@
 """Firmenbuch CLI - Hauptapplikation."""
 
+from pathlib import Path
+from typing import Optional
+
 import typer
 from rich.console import Console
 from rich.panel import Panel
 
 from .commands import auszug, config, suche, urkunde, veraenderungen
+from ..config import load_env_file
 
 # Haupt-App
 app = typer.Typer(
@@ -14,6 +18,20 @@ app = typer.Typer(
     rich_markup_mode="rich",
     pretty_exceptions_enable=True,
 )
+
+@app.callback()
+def main_callback(
+    env_file: Optional[Path] = typer.Option(
+        None,
+        "--env-file",
+        "-e",
+        help="Pfad zu einer .env Datei (überschreibt FIRMENBUCH_API_KEY)",
+    ),
+) -> None:
+    """Globale Optionen laden."""
+    if env_file:
+        load_env_file(env_file)
+
 
 # Sub-Commands registrieren
 app.add_typer(config.app, name="config")

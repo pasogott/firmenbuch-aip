@@ -9,6 +9,8 @@ class AuszugUmfang(str, Enum):
     """Mögliche Werte für den UMFANG-Parameter beim Firmenbuchauszug."""
 
     KURZINFORMATION = "Kurzinformation"
+    AKTUELLER_AUSZUG = "aktueller Auszug"
+    HISTORISCHER_AUSZUG = "historischer Auszug"
 
 
 class AuszugRequest(BaseModel):
@@ -58,7 +60,7 @@ class SucheFirmaRequest(BaseModel):
 
     @validator("gericht")
     def validate_gericht(cls, v):
-        if v and not v.isdigit() or len(v) != 3:
+        if v and (not v.isdigit() or len(v) != 3):
             raise ValueError("Gerichtsnummer muss 3-stellig sein")
         return v
 
@@ -85,9 +87,9 @@ class SucheUrkundeRequest(BaseModel):
     fnr: Optional[str] = Field(None, description="Firmenbuchnummer mit Prüfbuchstaben")
     az: Optional[str] = Field(None, description="Aktenzeichen")
 
-    @validator("fnr", "az")
+    @validator("az", always=True)
     def validate_at_least_one(cls, v, values):
-        if not v and not values.get("fnr") and not values.get("az"):
+        if not values.get("fnr") and not v:
             raise ValueError("Entweder FNR oder AZ muss angegeben werden")
         return v
 
@@ -123,7 +125,7 @@ class VeraenderungenFirmaRequest(BaseModel):
 
     @validator("gericht")
     def validate_gericht(cls, v):
-        if v and not v.isdigit() or len(v) != 3:
+        if v and (not v.isdigit() or len(v) != 3):
             raise ValueError("Gerichtsnummer muss 3-stellig sein")
         return v
 
@@ -137,11 +139,27 @@ class VeraenderungenFirmaRequest(BaseModel):
 class VeraenderungenUrkundeRequest(BaseModel):
     """Request-Modell für Urkundenveränderungen."""
 
-    fnr: str = Field(..., description="Firmenbuchnummer mit Prüfbuchstaben")
+    von: date = Field(..., description="Beginndatum")
+    bis: date = Field(..., description="Enddatum")
+
+    @validator("bis")
+    def validate_date_range(cls, v, values):
+        if "von" in values and v < values["von"]:
+            raise ValueError("Enddatum muss nach dem Beginndatum liegen")
+        return v
 
 
 class UrkundeRequest(BaseModel):
     """Request-Modell für den Urkundenabruf."""
 
-    fnr: str = Field(..., description="Firmenbuchnummer mit Prüfbuchstaben")
-    az: str = Field(..., description="Aktenzeichen")
+    key: Optional[str] = Field(None, description="Urkunden-Key")
+    fnr: Optional[str] = Field(None, description="Firmenbuchnummer mit Prüfbuchstaben")
+    az: Optional[str] = Field(None, description="Aktenzeichen")
+
+    @validator("az", always=True)
+    def validate_key_or_fnr_az(cls, v, values):
+        if values.get("key"):
+            return v
+        if not values.get("fnr") or not v:
+            raise ValueError("Entweder KEY oder FNR+AZ muss angegeben werden")
+        return v

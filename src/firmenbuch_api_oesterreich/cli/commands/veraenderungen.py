@@ -6,8 +6,12 @@ from typing import Annotated, Optional
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from ...models.request_models import VeraenderungenFirmaRequest
-from ...services.auszug import get_veraenderungen_firma
+from ...models.request_models import (
+    VeraenderungenFirmaRequest,
+    VeraenderungenUrkundeRequest,
+)
+from ...services.auszug import get_veraenderungen_firma, get_veraenderungen_urkunde
+from ..common import ensure_list, extract_response, resolve_api_key
 from ..console import (
     OutputFormat,
     console,
@@ -16,25 +20,8 @@ from ..console import (
     print_veraenderungen_table,
     print_warning,
 )
-from .config import get_api_key_from_config
 
 app = typer.Typer(help="Veränderungen abfragen")
-
-
-def get_api_key(api_key: Optional[str]) -> str:
-    """Holt den API-Key aus Parameter oder Config."""
-    if api_key:
-        return api_key
-    
-    key = get_api_key_from_config()
-    if not key:
-        print_error(
-            "Kein API-Key gefunden!\n\n"
-            "Setze den Key mit: fb config set-key\n"
-            "Oder übergib ihn mit: --api-key KEY"
-        )
-        raise typer.Exit(1)
-    return key
 
 
 @app.command("firmen")
@@ -87,7 +74,7 @@ def firmen(
         
         fb veraenderungen firmen -g 007 -r AG
     """
-    key = get_api_key(api_key)
+    key = resolve_api_key(api_key)
     
     # Defaults
     if bis is None:
@@ -117,12 +104,8 @@ def firmen(
             raise typer.Exit(1)
     
     # Ergebnisse extrahieren
-    response = result.get("Envelope", {}).get("Body", {}).get("VERAENDERUNGENFIRMARESPONSE", {})
-    veraenderungen = response.get("VERAENDERUNG", [])
-    
-    # Einzelergebnis in Liste umwandeln
-    if isinstance(veraenderungen, dict):
-        veraenderungen = [veraenderungen]
+    response = extract_response(result, "VERAENDERUNGENFIRMARESPONSE")
+    veraenderungen = ensure_list(response.get("VERAENDERUNG"))
     
     if not veraenderungen:
         print_warning("Keine Veränderungen gefunden")
@@ -179,7 +162,7 @@ def urkunden(
         
         fb veraenderungen urkunden --von 2024-01-01 --bis 2024-01-31
     """
-    key = get_api_key(api_key)
+    key = resolve_api_key(api_key)
     
     # Defaults
     if bis is None:
@@ -187,6 +170,11 @@ def urkunden(
     if von is None:
         von = bis - timedelta(days=7)
     
+    request = VeraenderungenUrkundeRequest(
+        von=von.date() if isinstance(von, datetime) else von,
+        bis=bis.date() if isinstance(bis, datetime) else bis,
+    )
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -196,43 +184,14 @@ def urkunden(
         progress.add_task(f"Lade Veränderungen {von.date()} - {bis.date()}...", total=None)
         
         try:
-            from ...config import API_URL, VERAENDERUNGEN_URKUNDE_NAMESPACE
-            import httpx
-            from ...utils.xml_utils import xml_to_json
-            
-            envelope = f"""<?xml version="1.0" encoding="UTF-8"?>
-            <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
-                           xmlns:fb="{VERAENDERUNGEN_URKUNDE_NAMESPACE}">
-                <soap:Header/>
-                <soap:Body>
-                    <fb:VERAENDERUNGENURKUNDEREQUEST>
-                        <fb:VON>{von.date()}</fb:VON>
-                        <fb:BIS>{bis.date()}</fb:BIS>
-                    </fb:VERAENDERUNGENURKUNDEREQUEST>
-                </soap:Body>
-            </soap:Envelope>
-            """
-            
-            headers = {
-                "Content-Type": "application/soap+xml;charset=UTF-8",
-                "X-API-KEY": key,
-            }
-            
-            response = httpx.post(API_URL, content=envelope, headers=headers)
-            response.raise_for_status()
-            result = xml_to_json(response.content)
-            
+            result = get_veraenderungen_urkunde(key, request)
         except Exception as e:
             print_error(str(e))
             raise typer.Exit(1)
     
     # Ergebnisse extrahieren
-    response_data = result.get("Envelope", {}).get("Body", {}).get("VERAENDERUNGENURKUNDERESPONSE", {})
-    veraenderungen = response_data.get("VERAENDERUNG", [])
-    
-    # Einzelergebnis in Liste umwandeln
-    if isinstance(veraenderungen, dict):
-        veraenderungen = [veraenderungen]
+    response_data = extract_response(result, "VERAENDERUNGENURKUNDERESPONSE")
+    veraenderungen = ensure_list(response_data.get("VERAENDERUNG"))
     
     if not veraenderungen:
         print_warning("Keine Veränderungen gefunden")

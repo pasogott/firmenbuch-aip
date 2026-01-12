@@ -6,13 +6,21 @@ from typing import Final, Optional
 
 from dotenv import load_dotenv
 
-# Lade .env Datei aus dem Projektroot
-env_path = Path(__file__).parent.parent.parent / ".env"
-load_dotenv(env_path)
+DEFAULT_ENV_PATH = Path(__file__).parent.parent.parent / ".env"
+load_dotenv(DEFAULT_ENV_PATH)
 
 # API Konfiguration
 API_URL: Final[str] = "https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws"
-API_KEY: Optional[str] = os.getenv("FIRMENBUCH_API_KEY", None)
+
+
+def load_env_file(env_file: Optional[Path]) -> None:
+    """Lädt eine .env Datei und überschreibt vorhandene Variablen."""
+    load_dotenv(env_file or DEFAULT_ENV_PATH, override=True)
+
+
+def get_env_api_key() -> Optional[str]:
+    """Liest den API-Key aus der Umgebung."""
+    return os.getenv("FIRMENBUCH_API_KEY")
 
 # SOAP Namespaces
 AUSZUG_NAMESPACE: Final[str] = "ns://firmenbuch.justiz.gv.at/Abfrage/v2/AuszugRequest"
