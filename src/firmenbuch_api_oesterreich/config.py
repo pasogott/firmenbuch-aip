@@ -11,6 +11,7 @@ load_dotenv(DEFAULT_ENV_PATH)
 
 # API Konfiguration
 API_URL: Final[str] = "https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws"
+REQUEST_TIMEOUT: Final[float] = 60.0
 
 
 def load_env_file(env_file: Path | None) -> None:

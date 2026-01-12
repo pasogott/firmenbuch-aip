@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import time
+
 import httpx
 from lxml import etree
 
-from ..config import API_URL
+from ..config import API_URL, REQUEST_TIMEOUT
 from ..utils.xml_utils import xml_to_json
 
 SOAP_ENV_NS = "http://www.w3.org/2003/05/soap-envelope"
@@ -52,10 +54,26 @@ def send_soap_request(api_key: str, envelope: str, soap_action: str | None = Non
     if soap_action:
         headers["SOAPAction"] = soap_action
 
-    response = httpx.post(API_URL, content=envelope, headers=headers)
-    response.raise_for_status()
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = httpx.post(
+                API_URL,
+                content=envelope,
+                headers=headers,
+                timeout=REQUEST_TIMEOUT,
+            )
+            response.raise_for_status()
+            xml_root = etree.fromstring(response.content)
+            _check_for_soap_fault(xml_root)
+            return xml_to_json(response.content)
+        except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.HTTPStatusError) as exc:
+            last_error = exc
+            if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code < 500:
+                raise
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            raise
 
-    xml_root = etree.fromstring(response.content)
-    _check_for_soap_fault(xml_root)
-
-    return xml_to_json(response.content)
+    raise last_error or RuntimeError("Unbekannter SOAP-Fehler")

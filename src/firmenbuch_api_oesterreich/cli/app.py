@@ -1,7 +1,9 @@
 """Firmenbuch CLI - Hauptapplikation."""
 
+from enum import Enum
 from pathlib import Path
 
+import click
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -40,6 +42,88 @@ app.add_typer(suche.app, name="suche")
 app.add_typer(urkunde.app, name="urkunde")
 app.add_typer(veraenderungen.app, name="veraenderungen")
 app.add_typer(doctor.app, name="doctor")
+
+
+def _collect_commands(command: click.Command, info_name: str) -> list[tuple[str, click.Command]]:
+    sections = [(info_name, command)]
+
+    if isinstance(command, click.Group):
+        for name, subcommand in command.commands.items():
+            sections.extend(_collect_commands(subcommand, f"{info_name} {name}"))
+
+    return sections
+
+
+def _format_param_type(param: click.Parameter) -> str:
+    param_type = getattr(param.type, "name", None) or str(param.type)
+    if hasattr(param.type, "choices"):
+        choices = ", ".join(param.type.choices)
+        return f"{param_type} ({choices})"
+    return param_type
+
+
+def _format_default(value: object) -> str:
+    if isinstance(value, Enum):
+        return str(value.value)
+    return str(value)
+
+
+def _format_option(option: click.Option) -> str:
+    flags = ", ".join([*option.opts, *option.secondary_opts])
+    help_text = option.help or ""
+    default = ""
+
+    if option.show_default and option.default not in (None, (), False):
+        default = f" [default: {_format_default(option.default)}]"
+
+    envvar = option.envvar if isinstance(option.envvar, str) else None
+    envvar_text = f" [env: {envvar}]" if envvar else ""
+    return f"- {flags} ({_format_param_type(option)}): {help_text}{default}{envvar_text}".rstrip()
+
+
+def _format_argument(argument: click.Argument) -> str:
+    required = " [required]" if argument.required else ""
+    help_text = getattr(argument, "help", "") or ""
+    suffix = f" {help_text}".rstrip() if help_text else ""
+    return f"- {argument.name} ({_format_param_type(argument)}):{required}{suffix}".rstrip()
+
+
+def _format_help_section(name: str, command: click.Command) -> str:
+    lines = [f"=== {name} ==="]
+    if command.help:
+        lines.append(command.help)
+
+    arguments = [param for param in command.params if isinstance(param, click.Argument)]
+    options = [param for param in command.params if isinstance(param, click.Option)]
+
+    if arguments:
+        lines.append("Arguments:")
+        lines.extend(_format_argument(arg) for arg in arguments)
+
+    if options:
+        lines.append("Options:")
+        lines.extend(_format_option(opt) for opt in options)
+
+    if isinstance(command, click.Group) and command.commands:
+        lines.append("Commands:")
+        for sub_name, subcommand in command.commands.items():
+            raw_help = subcommand.short_help or subcommand.help or ""
+            first_line = raw_help.strip().splitlines()[0] if raw_help.strip() else ""
+            lines.append(f"- {sub_name}: {first_line}".rstrip())
+
+    return "\n".join(lines)
+
+
+@app.command("help")
+def help_all() -> None:
+    """Zeigt die Hilfe für alle Commands (inkl. Subcommands)."""
+    root_name = "firmenbuchat"
+    sections: list[str] = []
+
+    for name, command in _collect_commands(typer.main.get_command(app), root_name):
+        sections.append(_format_help_section(name, command))
+
+    typer.echo("\n\n".join(sections))
 
 
 @app.command("version")
