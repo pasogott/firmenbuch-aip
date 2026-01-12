@@ -52,12 +52,11 @@ jobs:
             depends_on \"uv\"
 
             def install
-              system \"uv\", \"venv\", libexec, \"--python\", Formula[\"python@3.12\"].opt_bin/\"python3.12\"
+              ENV[\"UV_PROJECT_ENVIRONMENT\"] = libexec
 
-              ENV[\"VIRTUAL_ENV\"] = libexec
-              ENV[\"PATH\"] = \"#{libexec}/bin:#{ENV[\"PATH\"]}\"
-
-              system \"uv\", \"sync\", \"--project\", buildpath, \"--active\", \"--no-dev\", \"--no-editable\"
+              system \"uv\", \"sync\", \"--project\", buildpath,
+                \"--python\", Formula[\"python@3.12\"].opt_bin/\"python3.12\",
+                \"--no-dev\", \"--no-editable\"
 
               (bin/\"firmenbuchat\").write_env_script libexec/\"bin/firmenbuchat\",
                 PATH: \"#{libexec}/bin:$PATH\"
