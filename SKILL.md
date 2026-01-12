@@ -60,14 +60,6 @@ firmenbuchat help
 - `--limit`: Anzahl Ergebnisse (Tabellen)
 - `--offset`: Start-Offset
 
-## Linting & Tests
-
-```bash
-ruff check .
-ruff format .
-pytest -q
-```
-
 ## Projektstruktur
 
 ```
