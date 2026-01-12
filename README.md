@@ -58,6 +58,8 @@ uv add --editable .
 
 Du benötigst einen API-Key von JustizOnline. Siehe [API-Key erhalten](docs/API-KEY.md) für Details.
 
+Optional kannst du die Vorlage in `.env.example` verwenden.
+
 ```bash
 # API-Key sicher speichern (interaktiv)
 firmenbuchat config set-key
