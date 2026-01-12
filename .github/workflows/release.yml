@@ -1,0 +1,79 @@
+name: release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-homebrew-tap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Prepare release metadata
+        id: meta
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          TARBALL_URL="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz"
+          SHA256=$(curl -sL "$TARBALL_URL" | sha256sum | awk '{print $1}')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tarball_url=${TARBALL_URL}" >> "$GITHUB_OUTPUT"
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: pasogott/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update formula
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          version = "${{ steps.meta.outputs.version }}"
+          url = "${{ steps.meta.outputs.tarball_url }}"
+          sha256 = "${{ steps.meta.outputs.sha256 }}"
+
+          formula = f"""class Firmenbuchat < Formula
+            desc \"CLI for the Austrian company register (Firmenbuch)\"
+            homepage \"https://github.com/pasogott/firmenbuch-aip\"
+            url \"{url}\"
+            sha256 \"{sha256}\"
+            license \"MIT\"
+
+            head \"https://github.com/pasogott/firmenbuch-aip.git\", branch: \"main\"
+
+            depends_on \"python@3.12\"
+            depends_on \"uv\"
+
+            def install
+              system \"uv\", \"venv\", libexec, \"--python\", Formula[\"python@3.12\"].opt_bin/\"python3.12\"
+              system \"uv\", \"pip\", \"install\", \"--python\", libexec/\"bin/python\", buildpath
+
+              (bin/\"firmenbuchat\").write_env_script libexec/\"bin/firmenbuchat\",
+                PATH: \"#{libexec}/bin:$PATH\"
+            end
+
+            test do
+              assert_match \"Usage:\", shell_output(\"#{bin}/firmenbuchat --help\")
+            end
+          end
+          """
+
+          formula_path = Path("homebrew-tap/Formula/firmenbuchat.rb")
+          formula_path.write_text(formula)
+          PY
+
+      - name: Commit and push formula
+        run: |
+          cd homebrew-tap
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add Formula/firmenbuchat.rb
+          git commit -m "Update firmenbuchat to v${{ steps.meta.outputs.version }}" || exit 0
+          git push

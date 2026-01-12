@@ -41,6 +41,10 @@ $ firmenbuchat suche firma "Software*" --rechtsform GES
 # Mit uv (empfohlen)
 uv add git+https://github.com/pasogott/firmenbuch-aip.git
 
+# Homebrew (Tap)
+brew tap pasogott/tap
+brew install firmenbuchat
+
 # Für Entwicklung
 git clone https://github.com/pasogott/firmenbuch-aip.git
 cd firmenbuch-aip

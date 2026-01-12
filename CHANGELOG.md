@@ -8,6 +8,7 @@
 - `firmenbuchat` command name for the CLI.
 - `doctor` diagnostics command.
 - CONTRIBUTING guidelines and UV-based setup.
+- Homebrew Tap support and release automation workflow.
 
 ### Changed
 - Centralized SOAP request handling.
