@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
-    {name = "Pascal Gottfried"}
+    {name = "Pascal SCHOTT"}
 ]
 keywords = ["firmenbuch", "austria", "cli", "api", "hvd"]
 classifiers = [
