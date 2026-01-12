@@ -73,15 +73,14 @@ def suche_firma(api_key: str, request: SucheFirmaRequest) -> dict:
         f"    <fb:SUCHBEREICH>{request.suchbereich}</fb:SUCHBEREICH>",
     ]
 
-    for tag, value in (
-        ("GERICHT", request.gericht),
-        ("RECHTSFORM", request.rechtsform),
-        ("RECHTSEIGENSCHAFT", request.rechtseigenschaft),
-        ("ORTNR", request.ortnr),
-    ):
-        optional = _optional_tag(tag, value)
-        if optional:
-            lines.append(f"    {optional}")
+    lines.extend(
+        [
+            f"    <fb:GERICHT>{request.gericht or ''}</fb:GERICHT>",
+            f"    <fb:RECHTSFORM>{request.rechtsform or ''}</fb:RECHTSFORM>",
+            f"    <fb:RECHTSEIGENSCHAFT>{request.rechtseigenschaft or ''}</fb:RECHTSEIGENSCHAFT>",
+            f"    <fb:ORTNR>{request.ortnr or ''}</fb:ORTNR>",
+        ]
+    )
 
     lines.append("  </fb:SUCHEFIRMAREQUEST>")
     body = "\n".join(lines)
