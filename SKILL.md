@@ -1,93 +1,53 @@
-# SKILL.md — Firmenbuch CLI
+---
+name: firmenbuchat
+description: CLI für den Zugriff auf das österreichische Firmenbuch (HVD WebServices).
+homepage: https://github.com/pasogott/firmenbuch-aip
+metadata: {"clawdbot":{"emoji":"🇦🇹","requires":{"bins":["firmenbuchat"]},"install":[{"id":"brew","kind":"brew","formula":"pasogott/tap/firmenbuchat","bins":["firmenbuchat"],"label":"Install firmenbuchat (brew)"},{"id":"uv","kind":"shell","command":"uv add git+https://github.com/pasogott/firmenbuch-aip.git","label":"Install firmenbuchat (uv)"}]}}
+---
 
-## Zweck
-CLI für den Zugriff auf die österreichischen Firmenbuch-WebServices (HVD).
+# firmenbuchat
 
-## Installation (UV)
+Setup (API-Key)
+- `firmenbuchat config set-key`
+- `export FIRMENBUCH_API_KEY="dein-key"`
+- `.env`: `cp .env.example .env` und dann `firmenbuchat --env-file /pfad/zu/.env <command>`
 
-```bash
-uv add git+https://github.com/pasogott/firmenbuch-aip.git
-```
+Hilfe (alle Commands)
+- `firmenbuchat help`
 
-## Installation (Homebrew)
+Common Commands
+- Version: `firmenbuchat version`
+- Info: `firmenbuchat info`
+- Konfig anzeigen: `firmenbuchat config show`
+- Konfig löschen: `firmenbuchat config delete --force`
 
-```bash
-brew tap pasogott/tap
-brew install firmenbuchat
-```
+Firmenbuchauszug
+- `firmenbuchat auszug <FNR> [--stichtag YYYY-MM-DD] [--umfang "Kurzinformation"|"aktueller Auszug"|"historischer Auszug"]`
 
-## Authentifizierung
+Firmensuche
+- `firmenbuchat suche firma <SUCHBEGRIFF> [--bereich 1-6] [--exakt] [--gericht 007] [--rechtsform GES]`
 
-- API-Key von JustizOnline erforderlich
-- Speichern via CLI oder ENV:
+Urkundensuche
+- `firmenbuchat suche urkunde <FNR> [--output table|json|raw] [--limit 50] [--offset 0]`
 
-```bash
-firmenbuchat config set-key
-export FIRMENBUCH_API_KEY="dein-key"
-```
+Urkunden
+- Info: `firmenbuchat urkunde info <URKUNDEN_KEY>`
+- Download: `firmenbuchat urkunde download <URKUNDEN_KEY> [--output PATH]`
 
-## .env Datei verwenden
+Veränderungen
+- Firmen: `firmenbuchat veraenderungen firmen [--von YYYY-MM-DD] [--bis YYYY-MM-DD] [--gericht 007] [--rechtsform GES]`
+- Urkunden: `firmenbuchat veraenderungen urkunden [--von YYYY-MM-DD] [--bis YYYY-MM-DD]`
 
-```bash
-cp .env.example .env
-firmenbuchat --env-file /pfad/zu/deiner.env suche firma "Muster*"
-```
+Diagnose
+- `firmenbuchat doctor [--env-file PATH]`
 
-## Befehle
-
-```bash
-# Hilfe & Meta
-firmenbuchat help
-firmenbuchat version
-firmenbuchat info
-
-# Konfiguration
-firmenbuchat config set-key [API_KEY]
-firmenbuchat config show
-firmenbuchat config path
-firmenbuchat config delete [--force]
-
-# Firmenbuchauszug
-firmenbuchat auszug <FNR> [--stichtag YYYY-MM-DD] [--umfang "Kurzinformation"|"aktueller Auszug"|"historischer Auszug"]
-
-# Firmensuche
-firmenbuchat suche firma <SUCHBEGRIFF> [--bereich 1-6] [--exakt] [--gericht 007] [--rechtsform GES]
-
-# Urkundensuche
-firmenbuchat suche urkunde <FNR> [--output table|json|raw] [--limit 50] [--offset 0]
-
-# Urkunden
-firmenbuchat urkunde info <URKUNDEN_KEY>
-firmenbuchat urkunde download <URKUNDEN_KEY> [--output PATH]
-
-# Veränderungen
-firmenbuchat veraenderungen firmen [--von YYYY-MM-DD] [--bis YYYY-MM-DD] [--gericht 007] [--rechtsform GES]
-firmenbuchat veraenderungen urkunden [--von YYYY-MM-DD] [--bis YYYY-MM-DD]
-
-# Diagnose
-firmenbuchat doctor [--env-file PATH]
-```
-
-## Globale Optionen
-
+Globale Optionen
 - `-o, --output`: `table` (default), `json`, `raw`
 - `-k, --api-key`: API-Key direkt übergeben
 - `-e, --env-file`: Pfad zu `.env` Datei
 - `--limit`: Anzahl Ergebnisse (Tabellen)
 - `--offset`: Start-Offset
 
-## Projektstruktur
-
-```
-firmenbuch-aip/
-├── src/firmenbuch_api_oesterreich/
-│   ├── cli/
-│   ├── services/
-│   ├── models/
-│   └── utils/
-├── docs/
-├── tests/
-├── pyproject.toml
-├── CHANGELOG.md
-└── CONTRIBUTING.md
-```
+Notes
+- `veraenderungen urkunden` kann bei großen Zeiträumen 5xx liefern; kleinere Zeitfenster nutzen.
+- Downloads brauchen einen `URKUNDEN_KEY` aus `suche urkunde`.
