@@ -1,6 +1,27 @@
-# 🇦🇹 Firmenbuch API Österreich
+# 🇦🇹 Firmenbuch CLI
 
-Python-Client für die offiziellen FBW-WebServices des österreichischen Firmenbuchs (High-Value Dataset).
+Moderne CLI für das österreichische Firmenbuch - Zugriff auf die offiziellen High-Value Dataset WebServices.
+
+```
+$ fb suche firma "Software*" --rechtsform GES
+
+┏━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ FNR        ┃ Name                              ┃ Sitz    ┃ Rechtsform               ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 160573m    │ Software Solutions GmbH           │ Wien    │ Gesellschaft m.b.H.      │
+│ 234521a    │ Software & More GmbH              │ Graz    │ Gesellschaft m.b.H.      │
+└────────────┴───────────────────────────────────┴─────────┴──────────────────────────┘
+```
+
+---
+
+## ✨ Features
+
+- 🎨 **Schöne Ausgabe** - Tabellen, Farben, Spinner mit Rich
+- 🔐 **Sichere Key-Verwaltung** - API-Key wird sicher gespeichert
+- 📊 **Flexible Formate** - Ausgabe als Tabelle, JSON oder Raw
+- 💾 **Urkunden-Download** - PDFs und XMLs direkt herunterladen
+- ⚡ **Schnell** - Async HTTP mit httpx
 
 ---
 
@@ -8,20 +29,9 @@ Python-Client für die offiziellen FBW-WebServices des österreichischen Firmenb
 
 | Thema | Link |
 |-------|------|
+| **🔑 API-Key erhalten** | [docs/API-KEY.md](docs/API-KEY.md) |
 | **API-Übersicht** | [docs/api/01-uebersicht.md](docs/api/01-uebersicht.md) |
 | **Alle Endpunkte** | [docs/README.md](docs/README.md) |
-| **XSD-Schemas** | [docs/](docs/) |
-
-### Schnellzugriff API-Endpunkte
-
-| Endpunkt | Beschreibung | Docs |
-|----------|--------------|------|
-| Auszug V2 | Firmenbuchauszug abrufen | [→](docs/api/02-auszug.md) |
-| Firmensuche | Nach Firmen suchen | [→](docs/api/03-firmensuche.md) |
-| Urkundensuche | Urkunden einer Firma | [→](docs/api/04-urkundensuche.md) |
-| Urkunde | Dokument herunterladen | [→](docs/api/05-urkunde.md) |
-| Veränderungen Firmen | Änderungs-Feed | [→](docs/api/06-veraenderungen-firmen.md) |
-| Veränderungen Urkunden | Urkunden-Feed | [→](docs/api/07-veraenderungen-urkunden.md) |
 
 ---
 
@@ -29,119 +39,125 @@ Python-Client für die offiziellen FBW-WebServices des österreichischen Firmenb
 
 ```bash
 # Mit uv (empfohlen)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
+uv pip install git+https://github.com/pasogott/firmenbuch-aip.git
 
 # Oder mit pip
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+pip install git+https://github.com/pasogott/firmenbuch-aip.git
+
+# Für Entwicklung
+git clone https://github.com/pasogott/firmenbuch-aip.git
+cd firmenbuch-aip
+uv venv && source .venv/bin/activate
+uv pip install -e .
+```
+
+---
+
+## 🔑 API-Key einrichten
+
+Du benötigst einen API-Key von JustizOnline. Siehe [API-Key erhalten](docs/API-KEY.md) für Details.
+
+```bash
+# API-Key sicher speichern (interaktiv)
+fb config set-key
+
+# Oder als Umgebungsvariable
+export FIRMENBUCH_API_KEY="dein-key"
 ```
 
 ---
 
 ## 💻 Verwendung
 
-### Als Python-Modul
-
-```python
-from firmenbuch_api_oesterreich.services.auszug import get_auszug
-from firmenbuch_api_oesterreich.models.request_models import AuszugRequest
-
-request = AuszugRequest(
-    fnr="160573m",
-    stichtag="2024-03-20",
-    umfang="Kurzinformation"
-)
-result = get_auszug("dein-api-key", request)
-```
-
-### CLI
+### Firmensuche
 
 ```bash
-# Firmenbuchauszug abrufen
-python auszug.py auszug \
-  --api-key "dein-api-key" \
-  --fnr "160573m" \
-  --stichtag "2024-03-20" \
-  --umfang "Kurzinformation"
+# Einfache Suche
+fb suche firma "Musterfirma*"
 
-# Firmensuche
-python auszug.py suche-firma \
-  --api-key "dein-api-key" \
-  --firmenwortlaut "Bundesrechen*" \
-  --suchbereich 1
+# Mit Filtern
+fb suche firma "Software" --rechtsform GES --gericht 007
 
-# Hilfe anzeigen
-python auszug.py --help
+# Als JSON ausgeben
+fb suche firma "Test*" -o json
 ```
-
----
-
-## 🔑 Authentifizierung
-
-Du benötigst einen API-Key von JustizOnline. Dieser wird als HTTP-Header mitgeschickt:
-
-```http
-X-API-KEY: dein-api-key
-Content-Type: application/soap+xml;charset=UTF-8
-```
-
-**Basis-URL:** `https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws`
-
----
-
-## 📋 CLI-Befehle
 
 ### Firmenbuchauszug
 
 ```bash
-python auszug.py auszug --api-key KEY --fnr FNR --stichtag DATUM [--umfang UMFANG]
+# Kurzinformation (Standard)
+fb auszug 160573m
+
+# Mit Stichtag
+fb auszug 160573m --stichtag 2024-01-01
+
+# Vollständiger Auszug als JSON
+fb auszug 160573m -u "aktueller Auszug" -o json
 ```
 
-| Parameter | Beschreibung |
-|-----------|--------------|
-| `--fnr` | Firmenbuchnummer mit Prüfbuchstabe (z.B. `160573m`) |
-| `--stichtag` | Datum im Format `YYYY-MM-DD` |
-| `--umfang` | `Kurzinformation`, `aktueller Auszug`, `historischer Auszug` |
-
-### Firmensuche
+### Urkunden
 
 ```bash
-python auszug.py suche-firma --api-key KEY --firmenwortlaut TEXT --suchbereich N [OPTIONS]
-```
+# Urkunden einer Firma suchen
+fb suche urkunde 160573m
 
-| Parameter | Beschreibung |
-|-----------|--------------|
-| `--firmenwortlaut` | Suchbegriff (mit `*` für Wildcards) |
-| `--exaktesuche` | Flag für exakte Suche |
-| `--suchbereich` | 1-6 (siehe [Dokumentation](docs/api/03-firmensuche.md)) |
-| `--gericht` | 3-stellige Gerichtsnummer |
-| `--rechtsform` | Rechtsform-Code (z.B. `GES`, `AG`) |
+# Urkunde herunterladen
+fb urkunde download "304188_0070711322495_000___000_30_7730290_PDF"
 
-### Urkundensuche
-
-```bash
-python auszug.py suche-urkunde --api-key KEY --fnr FNR
-```
-
-### Urkunde abrufen
-
-```bash
-python auszug.py urkunde --api-key KEY --key URKUNDEN_KEY
+# Mit eigenem Dateinamen
+fb urkunde download "..." -o jahresabschluss.pdf
 ```
 
 ### Veränderungen
 
 ```bash
-# Firmenänderungen
-python auszug.py veraenderungen-firma --api-key KEY --von DATUM --bis DATUM
+# Firmenänderungen der letzten 7 Tage
+fb veraenderungen firmen
 
-# Urkundenänderungen  
-python auszug.py veraenderungen-urkunde --api-key KEY --von DATUM --bis DATUM
+# Für bestimmten Zeitraum
+fb veraenderungen firmen --von 2024-01-01 --bis 2024-01-31
+
+# Nur bestimmte Rechtsformen
+fb veraenderungen firmen -r AG -g 007
 ```
+
+### Konfiguration
+
+```bash
+# API-Key setzen
+fb config set-key
+
+# Aktuelle Config anzeigen
+fb config show
+
+# API-Infos und Hilfe
+fb info
+```
+
+---
+
+## 📋 Alle Befehle
+
+| Befehl | Beschreibung |
+|--------|--------------|
+| `fb auszug FNR` | Firmenbuchauszug abrufen |
+| `fb suche firma SUCHBEGRIFF` | Nach Firmen suchen |
+| `fb suche urkunde FNR` | Urkunden einer Firma suchen |
+| `fb urkunde download KEY` | Urkunde herunterladen |
+| `fb urkunde info KEY` | Urkunden-Metadaten anzeigen |
+| `fb veraenderungen firmen` | Firmenänderungen abfragen |
+| `fb veraenderungen urkunden` | Urkundenänderungen abfragen |
+| `fb config set-key` | API-Key speichern |
+| `fb config show` | Konfiguration anzeigen |
+| `fb info` | API-Infos und Hilfe |
+
+### Globale Optionen
+
+| Option | Beschreibung |
+|--------|--------------|
+| `-o, --output` | Ausgabeformat: `table` (Standard), `json`, `raw` |
+| `-k, --api-key` | API-Key direkt übergeben |
+| `--help` | Hilfe anzeigen |
 
 ---
 
@@ -149,36 +165,40 @@ python auszug.py veraenderungen-urkunde --api-key KEY --von DATUM --bis DATUM
 
 ```
 firmenbuch-aip/
-├── README.md
+├── src/firmenbuch_api_oesterreich/
+│   ├── cli/                   # CLI mit Typer & Rich
+│   │   ├── app.py
+│   │   ├── console.py
+│   │   └── commands/
+│   ├── services/              # API-Services
+│   ├── models/                # Pydantic-Models
+│   └── utils/                 # Hilfsfunktionen
 ├── docs/
-│   ├── README.md              # Dokumentations-Index
-│   ├── api/
-│   │   ├── 01-uebersicht.md
-│   │   ├── 02-auszug.md
-│   │   ├── 03-firmensuche.md
-│   │   ├── 04-urkundensuche.md
-│   │   ├── 05-urkunde.md
-│   │   ├── 06-veraenderungen-firmen.md
-│   │   ├── 07-veraenderungen-urkunden.md
-│   │   └── 08-fehlerbehandlung.md
-│   ├── *.xsd                  # XML-Schemas
-│   └── *.pdf                  # Original-Dokumentation
-├── src/
-│   └── firmenbuch_api_oesterreich/
-├── pyproject.toml
-└── uv.lock
+│   ├── API-KEY.md             # Wie man einen Key bekommt
+│   ├── api/                   # API-Dokumentation
+│   └── *.xsd                  # XML-Schemas
+└── pyproject.toml
 ```
 
 ---
 
 ## 🔗 Links
 
-- **WSDL:** https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws/fbw.wsdl
-- **API-Dokumentation:** [docs/](docs/)
-- **Kontakt Firmenbuch-Team:** firmenbuch@brz.gv.at
+| | |
+|-|-|
+| 🔑 **API-Key** | [Wie bekomme ich einen Key?](docs/API-KEY.md) |
+| 📚 **Docs** | [API-Dokumentation](docs/README.md) |
+| 🌐 **WSDL** | [justizonline.gv.at/.../fbw.wsdl](https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws/fbw.wsdl) |
+| 📧 **Kontakt** | firmenbuch@brz.gv.at |
+
+---
+
+## 🤝 Beitragen
+
+Beiträge sind willkommen! Bitte öffne ein Issue oder einen Pull Request.
 
 ---
 
 ## 📄 Lizenz
 
-Siehe [LICENSE](LICENSE) für Details.
+MIT License - siehe [LICENSE](LICENSE) für Details.

@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Final
+from typing import Final, Optional
 
 from dotenv import load_dotenv
 
@@ -12,12 +12,7 @@ load_dotenv(env_path)
 
 # API Konfiguration
 API_URL: Final[str] = "https://justizonline.gv.at/jop/api/at.gv.justiz.fbw/ws"
-API_KEY: Final[str] = os.getenv("FIRMENBUCH_API_KEY", "")
-
-if not API_KEY:
-    raise ValueError(
-        "FIRMENBUCH_API_KEY muss in der .env Datei oder als Umgebungsvariable gesetzt sein"
-    )
+API_KEY: Optional[str] = os.getenv("FIRMENBUCH_API_KEY", None)
 
 # SOAP Namespaces
 AUSZUG_NAMESPACE: Final[str] = "ns://firmenbuch.justiz.gv.at/Abfrage/v2/AuszugRequest"
