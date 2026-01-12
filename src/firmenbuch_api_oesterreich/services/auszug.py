@@ -1,5 +1,7 @@
 # services/auszug.py
 
+from enum import Enum
+
 from ..config import (
     AUSZUG_NAMESPACE,
     AUSZUG_SOAP_ACTION,
@@ -20,9 +22,11 @@ from ..models.request_models import (
 from .soap_client import build_envelope, send_soap_request
 
 
-def _optional_tag(tag: str, value: str | None) -> str:
+def _optional_tag(tag: str, value: str | Enum | None) -> str:
     if value is None or value == "":
         return ""
+    if isinstance(value, Enum):
+        value = value.value
     return f"<fb:{tag}>{value}</fb:{tag}>"
 
 
@@ -70,7 +74,7 @@ def suche_firma(api_key: str, request: SucheFirmaRequest) -> dict:
         "  <fb:SUCHEFIRMAREQUEST>",
         f"    <fb:FIRMENWORTLAUT>{request.firmenwortlaut}</fb:FIRMENWORTLAUT>",
         f"    <fb:EXAKTESUCHE>{str(request.exaktesuche).lower()}</fb:EXAKTESUCHE>",
-        f"    <fb:SUCHBEREICH>{request.suchbereich}</fb:SUCHBEREICH>",
+        f"    <fb:SUCHBEREICH>{request.suchbereich.value}</fb:SUCHBEREICH>",
     ]
 
     lines.extend(
