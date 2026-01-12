@@ -16,17 +16,6 @@ brew tap pasogott/tap
 brew install firmenbuchat
 ```
 
-## Dev-Setup
-
-```bash
-git clone https://github.com/pasogott/firmenbuch-aip.git
-cd firmenbuch-aip
-uv venv && source .venv/bin/activate
-uv add --editable .
-uv add --dev ruff mypy pytest pytest-mock pre-commit
-pre-commit install
-```
-
 ## Authentifizierung
 
 - API-Key von JustizOnline erforderlich
