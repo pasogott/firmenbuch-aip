@@ -20,6 +20,7 @@ from ..console import (
     print_veraenderungen_table,
     print_warning,
 )
+from ..pager import paginate
 
 app = typer.Typer(help="Veränderungen abfragen")
 
@@ -62,6 +63,10 @@ def firmen(
         int,
         typer.Option("--limit", "-l", help="Max. Anzahl Ergebnisse")
     ] = 100,
+    offset: Annotated[
+        int,
+        typer.Option("--offset", help="Start-Offset für Ergebnisse")
+    ] = 0,
 ) -> None:
     """
     Ruft Firmenveränderungen für einen Zeitraum ab.
@@ -111,15 +116,15 @@ def firmen(
         print_warning("Keine Veränderungen gefunden")
         return
     
-    # Limit anwenden
-    veraenderungen = veraenderungen[:limit]
-    
+    total = len(veraenderungen)
+    veraenderungen = paginate(veraenderungen, limit=limit, offset=offset)
+
     if output == OutputFormat.JSON:
         print_json(veraenderungen)
     elif output == OutputFormat.RAW:
         console.print(result)
     else:
-        print_veraenderungen_table(veraenderungen, "Firmenveränderungen")
+        print_veraenderungen_table(veraenderungen, "Firmenveränderungen", total=total)
 
 
 @app.command("urkunden")
@@ -152,6 +157,10 @@ def urkunden(
         int,
         typer.Option("--limit", "-l", help="Max. Anzahl Ergebnisse")
     ] = 100,
+    offset: Annotated[
+        int,
+        typer.Option("--offset", help="Start-Offset für Ergebnisse")
+    ] = 0,
 ) -> None:
     """
     Ruft Urkundenveränderungen für einen Zeitraum ab.
@@ -197,12 +206,12 @@ def urkunden(
         print_warning("Keine Veränderungen gefunden")
         return
     
-    # Limit anwenden
-    veraenderungen = veraenderungen[:limit]
-    
+    total = len(veraenderungen)
+    veraenderungen = paginate(veraenderungen, limit=limit, offset=offset)
+
     if output == OutputFormat.JSON:
         print_json(veraenderungen)
     elif output == OutputFormat.RAW:
         console.print(result)
     else:
-        print_veraenderungen_table(veraenderungen, "Urkundenveränderungen")
+        print_veraenderungen_table(veraenderungen, "Urkundenveränderungen", total=total)

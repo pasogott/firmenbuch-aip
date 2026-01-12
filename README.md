@@ -135,6 +135,9 @@ fb config show
 
 # API-Infos und Hilfe
 fb info
+
+# Diagnose
+fb doctor
 ```
 
 ---
@@ -152,6 +155,7 @@ fb info
 | `fb veraenderungen urkunden` | Urkundenänderungen abfragen |
 | `fb config set-key` | API-Key speichern |
 | `fb config show` | Konfiguration anzeigen |
+| `fb doctor` | Setup-Diagnose |
 | `fb info` | API-Infos und Hilfe |
 
 ### Globale Optionen
@@ -161,6 +165,8 @@ fb info
 | `-o, --output` | Ausgabeformat: `table` (Standard), `json`, `raw` |
 | `-k, --api-key` | API-Key direkt übergeben |
 | `-e, --env-file` | Pfad zu einer `.env` Datei |
+| `--limit` | Anzahl Ergebnisse (Tabellen) |
+| `--offset` | Start-Offset für Ergebnisse |
 | `--help` | Hilfe anzeigen |
 
 ---

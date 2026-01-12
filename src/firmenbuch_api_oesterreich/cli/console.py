@@ -59,10 +59,11 @@ def create_table(title: str, columns: list[tuple[str, str]]) -> Table:
     return table
 
 
-def print_firma_table(firmen: list[dict]) -> None:
+def print_firma_table(firmen: list[dict], total: int | None = None) -> None:
     """Gibt Firmen als Tabelle aus."""
+    total_label = f" / {total}" if total is not None else ""
     table = create_table(
-        f"🏢 {len(firmen)} Firmen gefunden",
+        f"🏢 {len(firmen)} Firmen{total_label}",
         [
             ("FNR", "cyan"),
             ("Name", "white"),
@@ -71,20 +72,20 @@ def print_firma_table(firmen: list[dict]) -> None:
             ("Gericht", "dim"),
         ]
     )
-    
+
     for firma in firmen:
         name = firma.get("NAME", "")
         if isinstance(name, list):
             name = " ".join(name)
-        
+
         rechtsform = firma.get("RECHTSFORM", {})
         if isinstance(rechtsform, dict):
             rechtsform = rechtsform.get("TEXT", rechtsform.get("CODE", ""))
-        
+
         gericht = firma.get("GERICHT", {})
         if isinstance(gericht, dict):
             gericht = gericht.get("TEXT", gericht.get("CODE", ""))
-        
+
         table.add_row(
             firma.get("FNR", ""),
             name,
@@ -92,14 +93,15 @@ def print_firma_table(firmen: list[dict]) -> None:
             rechtsform,
             gericht,
         )
-    
+
     console.print(table)
 
 
-def print_urkunden_table(urkunden: list[dict]) -> None:
+def print_urkunden_table(urkunden: list[dict], total: int | None = None) -> None:
     """Gibt Urkunden als Tabelle aus."""
+    total_label = f" / {total}" if total is not None else ""
     table = create_table(
-        f"📄 {len(urkunden)} Urkunden gefunden",
+        f"📄 {len(urkunden)} Urkunden{total_label}",
         [
             ("Key", "dim"),
             ("Dokumentart", "white"),
@@ -108,20 +110,20 @@ def print_urkunden_table(urkunden: list[dict]) -> None:
             ("Größe", "dim"),
         ]
     )
-    
+
     for urkunde in urkunden:
         dokumentart = urkunde.get("DOKUMENTART", {})
         if isinstance(dokumentart, dict):
             dokumentart = dokumentart.get("TEXT", dokumentart.get("CODE", ""))
-        
+
         groesse = urkunde.get("GROESSE", "")
         if groesse:
             groesse = f"{int(groesse) / 1024:.1f} KB"
-        
+
         key = urkunde.get("KEY", "")
         if len(key) > 30:
             key = key[:27] + "..."
-        
+
         table.add_row(
             key,
             dokumentart,
@@ -129,7 +131,7 @@ def print_urkunden_table(urkunden: list[dict]) -> None:
             urkunde.get("DATEIENDUNG", "").upper(),
             groesse,
         )
-    
+
     console.print(table)
 
 
@@ -167,10 +169,15 @@ def print_auszug(auszug: dict) -> None:
         console.print(f"   {adresse.get('PLZ', '')} {adresse.get('ORT', '')}")
 
 
-def print_veraenderungen_table(veraenderungen: list[dict], titel: str = "Veränderungen") -> None:
+def print_veraenderungen_table(
+    veraenderungen: list[dict],
+    titel: str = "Veränderungen",
+    total: int | None = None,
+) -> None:
     """Gibt Veränderungen als Tabelle aus."""
+    total_label = f" / {total}" if total is not None else ""
     table = create_table(
-        f"📊 {len(veraenderungen)} {titel}",
+        f"📊 {len(veraenderungen)} {titel}{total_label}",
         [
             ("FNR/Key", "cyan"),
             ("Datum", "white"),
@@ -178,7 +185,7 @@ def print_veraenderungen_table(veraenderungen: list[dict], titel: str = "Veränd
             ("VNR", "dim"),
         ]
     )
-    
+
     for v in veraenderungen:
         table.add_row(
             v.get("FNR", v.get("KEY", ""))[:30],
@@ -186,5 +193,5 @@ def print_veraenderungen_table(veraenderungen: list[dict], titel: str = "Veränd
             v.get("ARTDERVERAENDERUNG", v.get("DOKUMENTART", {}).get("TEXT", "")),
             v.get("VNR", ""),
         )
-    
+
     console.print(table)

@@ -7,7 +7,7 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from .commands import auszug, config, suche, urkunde, veraenderungen
+from .commands import auszug, config, doctor, suche, urkunde, veraenderungen
 from ..config import load_env_file
 
 # Haupt-App
@@ -39,6 +39,7 @@ app.add_typer(auszug.app, name="auszug")
 app.add_typer(suche.app, name="suche")
 app.add_typer(urkunde.app, name="urkunde")
 app.add_typer(veraenderungen.app, name="veraenderungen")
+app.add_typer(doctor.app, name="doctor")
 
 
 @app.command("version")

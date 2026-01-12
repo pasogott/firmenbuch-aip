@@ -17,6 +17,7 @@ from ..console import (
     print_urkunden_table,
     print_warning,
 )
+from ..pager import paginate
 
 app = typer.Typer(help="Firmen und Urkunden suchen")
 
@@ -55,6 +56,10 @@ def firma(
         int,
         typer.Option("--limit", "-l", help="Max. Anzahl Ergebnisse")
     ] = 50,
+    offset: Annotated[
+        int,
+        typer.Option("--offset", help="Start-Offset für Ergebnisse")
+    ] = 0,
 ) -> None:
     """
     Sucht nach Firmen im Firmenbuch.
@@ -107,16 +112,16 @@ def firma(
     if not ergebnisse:
         print_warning("Keine Firmen gefunden")
         return
-    
-    # Limit anwenden
-    ergebnisse = ergebnisse[:limit]
-    
+
+    total = len(ergebnisse)
+    ergebnisse = paginate(ergebnisse, limit=limit, offset=offset)
+
     if output == OutputFormat.JSON:
         print_json(ergebnisse)
     elif output == OutputFormat.RAW:
         console.print(result)
     else:
-        print_firma_table(ergebnisse)
+        print_firma_table(ergebnisse, total=total)
 
 
 @app.command("urkunde")
@@ -133,6 +138,14 @@ def urkunde(
         OutputFormat,
         typer.Option("--output", "-o", help="Ausgabeformat")
     ] = OutputFormat.TABLE,
+    limit: Annotated[
+        int,
+        typer.Option("--limit", "-l", help="Max. Anzahl Ergebnisse")
+    ] = 50,
+    offset: Annotated[
+        int,
+        typer.Option("--offset", help="Start-Offset für Ergebnisse")
+    ] = 0,
 ) -> None:
     """
     Sucht Urkunden zu einer Firma.
@@ -168,10 +181,13 @@ def urkunde(
     if not ergebnisse:
         print_warning("Keine Urkunden gefunden")
         return
-    
+
+    total = len(ergebnisse)
+    ergebnisse = paginate(ergebnisse, limit=limit, offset=offset)
+
     if output == OutputFormat.JSON:
         print_json(ergebnisse)
     elif output == OutputFormat.RAW:
         console.print(result)
     else:
-        print_urkunden_table(ergebnisse)
+        print_urkunden_table(ergebnisse, total=total)
