@@ -39,6 +39,14 @@ ruff format .
 pytest -q
 ```
 
+## Releases
+
+```bash
+# Version taggen und pushen (erstellt Release automatisch)
+git tag v0.2.0
+git push origin v0.2.0
+```
+
 ## Pull Requests
 
 - Bitte kleine, fokussierte PRs

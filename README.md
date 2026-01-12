@@ -189,6 +189,8 @@ pytest -q
 
 Weitere Infos: [CONTRIBUTING.md](CONTRIBUTING.md)
 
+Release wird automatisch erzeugt, sobald ein Git-Tag `vX.Y.Z` gepusht wird.
+
 ## 📁 Projektstruktur
 
 ```
