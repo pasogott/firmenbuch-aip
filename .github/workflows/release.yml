@@ -53,7 +53,7 @@ jobs:
 
             def install
               system \"uv\", \"venv\", libexec, \"--python\", Formula[\"python@3.12\"].opt_bin/\"python3.12\"
-              system \"uv\", \"pip\", \"install\", \"--python\", libexec/\"bin/python\", buildpath
+              system \"uv\", \"sync\", \"--python\", libexec/\"bin/python\", \"--project\", buildpath, \"--no-dev\", \"--no-editable\"
 
               (bin/\"firmenbuchat\").write_env_script libexec/\"bin/firmenbuchat\",
                 PATH: \"#{libexec}/bin:$PATH\"
