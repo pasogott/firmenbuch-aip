@@ -33,23 +33,39 @@ cp .env.example .env
 firmenbuchat --env-file /pfad/zu/deiner.env suche firma "Muster*"
 ```
 
-## Hauptbefehle
+## Befehle
 
 ```bash
-firmenbuchat auszug 160573m
-firmenbuchat suche firma "Musterfirma*"
-firmenbuchat suche urkunde 160573m
-firmenbuchat urkunde info "URKUNDEN_KEY"
-firmenbuchat urkunde download "URKUNDEN_KEY"
-firmenbuchat veraenderungen firmen --von 2024-01-01 --bis 2024-01-31
-firmenbuchat veraenderungen urkunden --von 2024-01-01 --bis 2024-01-31
-firmenbuchat doctor
-```
-
-## Hilfe
-
-```bash
+# Hilfe & Meta
 firmenbuchat help
+firmenbuchat version
+firmenbuchat info
+
+# Konfiguration
+firmenbuchat config set-key [API_KEY]
+firmenbuchat config show
+firmenbuchat config path
+firmenbuchat config delete [--force]
+
+# Firmenbuchauszug
+firmenbuchat auszug <FNR> [--stichtag YYYY-MM-DD] [--umfang "Kurzinformation"|"aktueller Auszug"|"historischer Auszug"]
+
+# Firmensuche
+firmenbuchat suche firma <SUCHBEGRIFF> [--bereich 1-6] [--exakt] [--gericht 007] [--rechtsform GES]
+
+# Urkundensuche
+firmenbuchat suche urkunde <FNR> [--output table|json|raw] [--limit 50] [--offset 0]
+
+# Urkunden
+firmenbuchat urkunde info <URKUNDEN_KEY>
+firmenbuchat urkunde download <URKUNDEN_KEY> [--output PATH]
+
+# Veränderungen
+firmenbuchat veraenderungen firmen [--von YYYY-MM-DD] [--bis YYYY-MM-DD] [--gericht 007] [--rechtsform GES]
+firmenbuchat veraenderungen urkunden [--von YYYY-MM-DD] [--bis YYYY-MM-DD]
+
+# Diagnose
+firmenbuchat doctor [--env-file PATH]
 ```
 
 ## Globale Optionen
